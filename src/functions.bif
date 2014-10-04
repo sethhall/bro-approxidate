@@ -1,0 +1,22 @@
+
+%%{ // C segment
+#include <approxidate.h>
+#include <sys/time.h>
+%%}
+
+function approxidate%(date: string%): time
+	%{
+	struct timeval now;
+	struct timezone tz;
+
+	gettimeofday(&now, &tz);
+	time_t t = approxidate_relative(date->CheckString(), &now);
+	if ( ! t )
+		{
+		reporter->Warning("approxidate conversion failed: date:\"%s\"", date->CheckString());
+		return new Val(0.0, TYPE_TIME);
+		}
+
+	//double ret = now.tv_sec + now.tv_usec;
+	return new Val(double(t), TYPE_TIME);
+	%}
